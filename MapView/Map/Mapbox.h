@@ -1,7 +1,5 @@
 //
 // Mapbox.h
-// 
-// test modified!
 //
 // Copyright (c) 2008-2013, Mapbox & Route-Me Contributors
 // All rights reserved.
