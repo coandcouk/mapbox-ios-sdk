@@ -57,11 +57,20 @@
     
     id <RMTileSource>_activeTileSource;
     NSOperationQueue *_backgroundFetchQueue;
+    
+    NSString *_dbCachePath;
 }
 
 @synthesize backgroundCacheDelegate=_backgroundCacheDelegate;
 
+
 - (id)initWithExpiryPeriod:(NSTimeInterval)period
+{
+    return [self initWithExpiryPeriod:period dbPath:nil];
+}
+
+
+- (id)initWithExpiryPeriod:(NSTimeInterval)period dbPath:(NSString*)dbPath
 {
     if (!(self = [super init]))
         return nil;
@@ -75,6 +84,8 @@
     _backgroundCacheDelegate = nil;
     _activeTileSource = nil;
     _backgroundFetchQueue = nil;
+    
+    _dbCachePath = dbPath;
 
     id cacheCfg = [[RMConfiguration configuration] cacheConfiguration];
     if (!cacheCfg)
@@ -82,7 +93,7 @@
                     [NSDictionary dictionaryWithObject: @"memory-cache" forKey: @"type"],
                     [NSDictionary dictionaryWithObject: @"db-cache"     forKey: @"type"],
                     nil];
-
+    
     for (id cfg in cacheCfg)
     {
         id <RMTileCache> newCache = nil;
@@ -116,7 +127,7 @@
 
 - (id)init
 {
-    if (!(self = [self initWithExpiryPeriod:0]))
+    if (!(self = [self initWithExpiryPeriod:0 dbPath:nil]))
         return nil;
 
     return self;
@@ -574,7 +585,12 @@ static NSMutableDictionary *predicateValues = nil;
 
     RMLog(@"Database cache configuration: {capacity : %lu, strategy : %@, minimalPurge : %lu, expiryPeriod: %.0f, useCacheDir : %@}", (unsigned long)capacity, strategyStr, (unsigned long)minimalPurge, _expiryPeriod, useCacheDir ? @"YES" : @"NO");
 
-    RMDatabaseCache *dbCache = [[RMDatabaseCache alloc] initUsingCacheDir:useCacheDir];
+    RMDatabaseCache *dbCache = nil;
+    if (_dbCachePath == nil) {
+        dbCache = [[RMDatabaseCache alloc] initUsingCacheDir:useCacheDir];
+    } else {
+        dbCache = [[RMDatabaseCache alloc] initWithDatabase:_dbCachePath];
+    }
     [dbCache setCapacity:capacity];
     [dbCache setPurgeStrategy:strategy];
     [dbCache setMinimalPurge:minimalPurge];
