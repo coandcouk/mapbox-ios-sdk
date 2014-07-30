@@ -246,6 +246,8 @@
                                maxZoomLevel:(float)initialTileSourceMaxZoomLevel
                                minZoomLevel:(float)initialTileSourceMinZoomLevel
                             backgroundImage:(UIImage *)backgroundImage
+                                  tileCache:(RMTileCache*)tileCache
+
 {
     _constrainMovement = _constrainMovementByUser = _bouncingEnabled = _zoomingInPivotsAroundCenter = NO;
     _draggingEnabled = YES;
@@ -287,7 +289,7 @@
     _zoomDelegateQueue = [NSOperationQueue new];
     [_zoomDelegateQueue setMaxConcurrentOperationCount:1];
 
-    [self setTileCache:[RMTileCache new]];
+    [self setTileCache:(tileCache == nil ? [RMTileCache new] : tileCache)];
 
     if (backgroundImage)
     {
@@ -353,10 +355,17 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-    return [self initWithFrame:frame andTilesource:[RMMapboxSource new]];
+    return [self initWithFrame:frame andTilesource:[RMMapboxSource new] tileCache:nil];
 }
 
+
 - (id)initWithFrame:(CGRect)frame andTilesource:(id <RMTileSource>)newTilesource
+{
+    return [self initWithFrame:frame andTilesource:newTilesource tileCache:nil];
+}
+
+
+- (id)initWithFrame:(CGRect)frame andTilesource:(id <RMTileSource>)newTilesource tileCache:(RMTileCache*)cache
 {
 	return [self initWithFrame:frame
                  andTilesource:newTilesource
@@ -364,8 +373,28 @@
                      zoomLevel:kDefaultInitialZoomLevel
                   maxZoomLevel:kDefaultMaximumZoomLevel
                   minZoomLevel:kDefaultMinimumZoomLevel
-               backgroundImage:nil];
+               backgroundImage:nil
+                     tileCache:cache];
 }
+
+
+- (id)initWithFrame:(CGRect)frame
+      andTilesource:(id <RMTileSource>)newTilesource
+   centerCoordinate:(CLLocationCoordinate2D)initialCenterCoordinate
+          zoomLevel:(float)initialZoomLevel
+       maxZoomLevel:(float)maxZoomLevel
+       minZoomLevel:(float)minZoomLevel
+    backgroundImage:(UIImage *)backgroundImage {
+    return [self initWithFrame:frame
+                 andTilesource:newTilesource
+              centerCoordinate:initialCenterCoordinate
+                     zoomLevel:initialZoomLevel
+                  maxZoomLevel:maxZoomLevel
+                  minZoomLevel:minZoomLevel
+               backgroundImage:backgroundImage
+                     tileCache:nil];
+}
+
 
 - (id)initWithFrame:(CGRect)frame
       andTilesource:(id <RMTileSource>)newTilesource
@@ -374,6 +403,7 @@
        maxZoomLevel:(float)maxZoomLevel
        minZoomLevel:(float)minZoomLevel
     backgroundImage:(UIImage *)backgroundImage
+          tileCache:(RMTileCache*)tileCache
 {
     if (!newTilesource || !(self = [super initWithFrame:frame]))
         return nil;
@@ -383,7 +413,8 @@
                                     zoomLevel:initialZoomLevel
                                  maxZoomLevel:maxZoomLevel
                                  minZoomLevel:minZoomLevel
-                              backgroundImage:backgroundImage];
+                              backgroundImage:backgroundImage
+                                    tileCache:tileCache];
 
     return self;
 }
@@ -621,7 +652,8 @@
                                         zoomLevel:kDefaultInitialZoomLevel
                                      maxZoomLevel:kDefaultMaximumZoomLevel
                                      minZoomLevel:kDefaultMinimumZoomLevel
-                                  backgroundImage:nil];
+                                  backgroundImage:nil
+                                        tileCache:nil];
     }
 
     if ( ! self.viewControllerPresentingAttribution && ! _hideAttribution)
