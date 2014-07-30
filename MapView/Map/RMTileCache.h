@@ -114,12 +114,21 @@ typedef enum : short {
 /** @name Initializing a Cache Manager */
 
 /** Initializes and returns a newly allocated cache object with specified expiry period.
+ *
+ *   If the `init` method is used to initialize a cache instead, a period of `0` is used. In that case, time-based expiration of tiles is not performed, but rather the cached tile count is used instead.
+ *
+ *   @param period A period of time after which tiles should be expunged from the cache.
+ *   @return An initialized cache object or `nil` if the object couldn't be created. */
+- (id)initWithExpiryPeriod:(NSTimeInterval)period;
+
+/** Initializes and returns a newly allocated cache object with specified expiry period.
 *
 *   If the `init` method is used to initialize a cache instead, a period of `0` is used. In that case, time-based expiration of tiles is not performed, but rather the cached tile count is used instead.
 *
 *   @param period A period of time after which tiles should be expunged from the cache.
+*   @param dbPath a path where to store file backed database storage
 *   @return An initialized cache object or `nil` if the object couldn't be created. */
-- (id)initWithExpiryPeriod:(NSTimeInterval)period;
+- (id)initWithExpiryPeriod:(NSTimeInterval)period dbPath:(NSString*)dbPath;
 
 /** @name Identifying Cache Objects */
 
